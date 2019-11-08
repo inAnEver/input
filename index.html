@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>jQuery文本框input输入关键字自动补全筛选代码,焦点消失恢复默认值</title>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+<style>
+body{
+	height: 900px;
+}
+.input_conter{
+	display: inline-block;
+    padding-right: 35px;
+    font-size: 14px;
+    border: 1px solid #ececec;
+    color: #444;
+    position: relative;
+    cursor: pointer;
+    height: 36px;
+    line-height: 36px;
+    margin-left: -5px;
+    vertical-align: bottom;
+}
+.input_conter input{
+	height: 30px;
+	border: none;
+}
+#select_list{
+	display: none;
+    background: #fff;
+    position: absolute;
+    top: 34px;
+    left: -1px;
+    border: 1px solid #ececec;
+	overflow-y: auto;
+    max-height: 280px;
+}
+ #select_list li {
+    text-align: left;
+    padding: 0 15px;
+	list-style: none;
+}
+#select_list li:hover{
+	background: #20a53a;
+	color: #fff;
+}
+#select_list.active{
+	display: block;
+}
+#select_list li.act {
+    background: #20a53a;
+    color: #fff;
+}
+.input_conter .select_down{
+	display: inline-block;
+    width: 0;
+    height: 0;
+    border-width: 6px;
+    border-style: solid;
+    border-color: #777 transparent transparent transparent;
+    position: absolute;
+    top: 14px;
+    right: 12px;
+    transition: all 500ms;
+}
+</style>
+
+</head>
+<body>
+<div class="input_conter">
+	<input type="text" class="site_input" name="input_con">
+	<ul id="select_list"></ul>
+	<span class="select_down"></span> 
+</div>
+</body>
+
+<script type="text/javascript">
+	var selectAry = {
+		siteVal: '',   // 当前站点
+		siteArray: ["aa.com","ttao.com","woailo.com","aolizi.com","b4399.ss","adddd.com","wweer.com"], // 数据列表
+		init:function(){
+			var _this = this;
+			_this.get_site_list(); // 获取站点列表
+			// input 删除或为空时，恢复为原来的值
+			$(".input_conter").click(function(e){
+				var _select = $(this).find('#select_list');
+				var _that = $(this);
+				if(_select.hasClass('active')){
+					_select.removeClass('active');
+				}else{
+					_select.addClass('active');
+				}
+				// 点击外部关闭ul
+				$('body').unbind('click').click(function(){
+					// "值"不等于原有值或为空时  则恢复原有值
+					if(_that.find('input').val() != _this.siteVal || _that.find('input').val() == ''){
+						_that.find("input").val(_this.siteVal)
+					}
+					// 关闭ul
+					$('#select_list').removeClass('active');
+				});
+				// 去除冒泡事件
+				e.preventDefault();
+				e.stopPropagation();
+			})
+			// input 输入时事件
+			$("input[name='input_con']").bind("keyup",function(event){
+				var temp = new Array();  //声明新的数组
+				for(var i = 0; i < _this.siteArray.length; i++){
+					// 把不等于当前input的值放到新数组中
+					if(_this.siteArray[i].indexOf(this.value)>=0){
+						temp[temp.length] = _this.siteArray[i]
+					}
+				}
+				// 点击input出发显示ul
+				$("#select_list").addClass("active");
+				$("#select_list").html("");
+				// 循环数组，动态生成li
+				for(var j = 0; j<temp.length; j++){
+					$("#select_list").append("<li>"+temp[j]+"</li>")
+				}
+				$("#select_list li").removeClass("act")
+			});
+			// li 点击时
+			$("#select_list").on("click","li",function(e){
+				// 获取所选值
+				var res = $(this).text();
+				// 给所选值添加act类名，删除同层act类名，关闭ul
+				$(this).addClass('act').siblings().removeClass('act').parent().removeClass('active');
+				// 把所选值修改为当前input的值
+				$('.site_input').val(res)
+				// 备份一个当前值
+				_this.siteVal = res;
+				e.preventDefault();
+				e.stopPropagation();
+			})
+		},
+		get_site_list(){
+			var _li = '',_this = this;
+			// 判断数据长度为0时，返回没有数据
+			if(_this.siteArray.length == 0){
+				$(".site_input").val("No Site");
+				return false;
+			}
+			// 循环数组，动态生成li
+			for(var i = 0; i<_this.siteArray.length; i++){
+				_li += '<li '+ (i== 0?'class="act"':'') +'>'+ _this.siteArray[i] +'</li>'
+			}
+			// 初始站点备份
+			_this.siteVal = _this.siteArray[0]; 
+			// 默认开始取第一个值为默认值
+			$(".site_input").val(_this.siteArray[0]);
+			// 把循环出的值放到ul中
+			$('#select_list').html(_li);
+		}
+	}
+	// 第一步从这里开始  初始化
+	selectAry.init(); 
+	
+</script>
+</html>
