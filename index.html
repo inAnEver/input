@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-cn">
 <head>
     <meta charset="UTF-8">
@@ -78,6 +78,7 @@ body{
 
 <script type="text/javascript">
 	var selectAry = {
+		keynum: -1,
 		siteVal: '',   // 当前站点
 		siteArray: ["aa.com","ttao.com","woailo.com","aolizi.com","b4399.ss","adddd.com","wweer.com"], // 数据列表
 		init:function(){
@@ -121,7 +122,27 @@ body{
 				for(var j = 0; j<temp.length; j++){
 					$("#select_list").append("<li>"+temp[j]+"</li>")
 				}
-				$("#select_list li").removeClass("act")
+				if(event.keyCode == 38){
+					$("#select_list li").removeClass("act");
+					_this.keynum--;
+					if(_this.keynum < 0){
+						_this.keynum = $("#select_list li").length - 1;
+					}
+					$("#select_list li").eq(_this.keynum).addClass("act");
+				}else if(event.keyCode == 40){
+					$("#select_list li").removeClass("act");
+					_this.keynum++;
+					if(_this.keynum >= $("#select_list li").length){
+						_this.keynum = 0;
+					}
+					$("#select_list li").eq(_this.keynum).addClass("act");
+				}
+				if(event.keyCode == 13){
+					var enterKey = $("#select_list li").eq(_this.keynum).html();
+					_this.siteVal = enterKey
+					$(".site_input").val(enterKey);
+					$("#select_list").removeClass("active");
+				}
 			});
 			// li 点击时
 			$("#select_list").on("click","li",function(e){
